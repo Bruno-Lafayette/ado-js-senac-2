@@ -6,7 +6,7 @@
  * @return {string[]} Os nomes dos alunos que fizeram este exercício.
  */
 function nomesDosAlunos() {
-    return [ "João da Silva", "Maria da Silva" ];
+    return ["Lucas Cristiano Lopes", "Thiago Dias", "Bruno Lafayette"];
 }
 
 /**
@@ -48,19 +48,30 @@ class Nota {
      * @param {number} peso O peso da nota, entre 0 a 10, na composição total da nota semestral.
      */
     #verificar(valor, peso) {
-        naoFizIssoAinda();
+        if (determinarTipo2(valor) !== 'number' || determinarTipo2(peso) !== 'number') {
+            throw new TypeError("A nota e o peso devem ser numéricos.");
+        }
+        if ((valor < 0 || valor > 10) || (peso < 0 || peso > 10)) {
+            throw new RangeError("A nota e o peso devem ser um número entre 0 e 10.");
+        }
     }
 
     // EXERCÍCIO 2.
     // Crie os métodos getters necessários de todos os parâmetros recebidos no construtor aqui.
-
+    get valor() {
+        return this.#valor;
+    }
+    get peso() {
+        return this.#peso;
+    }
     // EXERCÍCIO 3.
     /**
      * Retorna o valor ponderado desta nota. Ou seja, a nota numa escala de 0 a peso.
      * @returns {number} O valor ponderado desta nota.
      */
     get notaPonderada() {
-        naoFizIssoAinda();
+        const emponderada = this.#peso * this.#valor / 10;
+        return emponderada;
     }
 
     // EXERCÍCIO 4.
@@ -71,7 +82,9 @@ class Nota {
      * @returns {String} A representação string deste objeto.
      */
     toString() {
-        naoFizIssoAinda();
+        const valor = this.#valor;
+        const peso = this.#peso;
+        return `nota = ${valor}, peso = ${peso}`;
     }
 }
 
@@ -120,11 +133,79 @@ class AlunoMatricula {
      * @throw RangeError Se o valor de qualquer parâmetro não for aceitável.
      */
     constructor(nome, genero, disciplina, ados, presenca) {
-        naoFizIssoAinda();
+        if (typeof nome !== "string") {
+            throw new TypeError("Informe o nome do(a) aluno(a) corretamente.");
+        }
+
+        if (nome.trim() === "" ) {
+            throw new RangeError("Informe o nome do(a) aluno(a) corretamente.");
+        }
+
+        if (typeof genero !== "string") {
+            throw new TypeError("Escolha o gênero do(a) aluno(a) corretamente.");
+        }
+
+        if (genero !== "M" && genero !== "F") {
+            throw new RangeError("Escolha o gênero do(a) aluno(a) corretamente.");
+        }
+
+        if (typeof disciplina !== "string") {
+            throw new TypeError("Informe o nome da disciplina corretamente.");
+        }
+        if (disciplina.trim() === "") {
+            throw new RangeError("Informe o nome da disciplina corretamente.");
+        }
+
+        if (!Array.isArray(ados) || !ados.every((ado) => ado instanceof Nota)) {
+            throw new TypeError("Informe os ADOs corretamente como um array de objetos da classe Nota.");
+        }
+
+        if (ados.length === 0 ) {
+            throw new RangeError("Informe os ADOs corretamente como um array de objetos da classe Nota.");
+        }
+
+
+        const pesoTotal = ados.reduce((total, ado) => total + ado.peso, 0);
+        if (pesoTotal !== 10) {
+            throw new RangeError("O peso das notas deve somar 10.");
+        }
+
+        if (typeof presenca !== "number" || isNaN(presenca)) {
+            throw new TypeError("Informe a presença corretamente como um número entre 0 e 100.");
+        }
+
+        if (presenca < 0 || presenca > 100 ) {
+            throw new RangeError("Informe a presença corretamente como um número entre 0 e 100.");
+        }
+
+        this._nome = nome;
+        this._genero = genero;
+        this._disciplina = disciplina;
+        this._ados = ados;
+        this._presenca = presenca;
     }
 
     // EXERCÍCIO 6.
     // Crie os métodos getters necessários de todos os parâmetros recebidos no construtor aqui.
+    get nome() {
+        return this._nome;
+    }
+
+    get genero() {
+        return this._genero;
+    }
+
+    get disciplina() {
+        return this._disciplina;
+    }
+
+    get ados() {
+        return this._ados;
+    }
+
+    get presenca() {
+        return this._presenca;
+    }
 
     // EXERCÍCIO 7.
     /**
@@ -134,7 +215,14 @@ class AlunoMatricula {
      * @returns {number} A média final do(a) aluno(a) na disciplina.
      */
     get media() {
-        naoFizIssoAinda();
+        if (this._ados.length === 0){
+            return 0; 
+        }
+        let somaNotas = 0;
+        for (let nota of this._ados) {
+            somaNotas += nota.notaPonderada;
+        }
+        return somaNotas;
     }
 
     // EXERCÍCIO 8.
@@ -152,7 +240,15 @@ class AlunoMatricula {
      * @returns {String} A situação final do(a) aluno(a) na disciplina.
      */
     get situacao() {
-        naoFizIssoAinda();
+        let foiOuNaoFoi = "";
+        if (this.media < 7 && this.presenca < 75) {
+            foiOuNaoFoi = "RMF";
+        }else if (this.media < 7) {
+            foiOuNaoFoi = "RM";
+        }else if (this.presenca < 75) {
+            foiOuNaoFoi = "RF";
+        } else foiOuNaoFoi = "AP";
+        return foiOuNaoFoi;
     }
 
     // EXERCÍCIO 9.
@@ -171,7 +267,31 @@ class AlunoMatricula {
      * @returns {String} A situação final do(a) aluno(a) na disciplina, escrito por extenso.
      */
     get situacaoPorExtenso() {
-        naoFizIssoAinda();
+        let saida = "";
+        //Aprovadxs
+        if (this.situacao === "AP" && this.genero === "M") {
+            saida = "aprovado";
+        }else if (this.situacao === "AP" && this.genero === "F") {
+            saida = "aprovada";
+        }
+        //Reprovadxs por média
+        else if (this.situacao === "RM" && this.genero === "M") {
+            saida = "reprovado por média";
+        }else if (this.situacao === "RM" && this.genero === "F") {
+            saida = "reprovada por média";
+        }
+        //Reprovadxs por falta
+        else if (this.situacao === "RF" && this.genero === "M") {
+            saida = "reprovado por falta";
+        }else if (this.situacao === "RF" && this.genero === "F") {
+            saida = "reprovada por falta";
+        }
+        //Reprovadxs por média & falta
+        else if (this.situacao === "RMF" && this.genero === "M") {
+            saida = "reprovado por média e falta";
+        }else// (this.situacao === "RMF" && this.genero === "F") 
+            saida = "reprovada por média e falta";
+        return saida;
     }
 
     // EXERCÍCIO 10.
@@ -198,7 +318,14 @@ class AlunoMatricula {
      * @returns {String} O status descritivo do(a) aluno(a).
      */
     get status() {
-        naoFizIssoAinda();
+        const nome = this.nome;
+        const media = this.media;
+        const disciplina = this.disciplina;
+        const situacao = this.situacaoPorExtenso;
+        const presenca = this.presenca;
+
+        const status = `${nome} tem média ${media} na disciplina de ${disciplina} e foi ${situacao} com ${presenca}% de presença.`;
+        return status;
     }
 }
 
@@ -221,9 +348,55 @@ class AlunoMatricula {
  * Onde XXX e YYY devem ser IDs que não existem em nenhum outro lugar da página.
  * Coloque esse <li> dentro do <ul> que está dentro da <div> com a classe ex11e13 no ado2.html.
  */
+
+// Armazenar um contador para o ID da nota
+let notaCounter = 1;
+
+// Armazenar um contador para o ID do peso
+let pesoCounter = 1;
+
 function criarItemNota() {
-    naoFizIssoAinda();
-}
+    const ulElement = document.querySelector('.ex11a13 ul');
+  
+    const liElement = document.createElement('li');
+  
+    const div1Element = document.createElement('div');
+  
+    const novaNotaId = `nota-${notaCounter}`;
+  
+
+    const novaNotaLabel = document.createElement('label');
+    novaNotaLabel.setAttribute('for', novaNotaId);
+    novaNotaLabel.textContent = 'Nota:';
+  
+    const novaNotaInput = document.createElement('input');
+    novaNotaInput.setAttribute('type', 'text');
+    novaNotaInput.setAttribute('id', novaNotaId);
+  
+    div1Element.appendChild(novaNotaLabel);
+    div1Element.appendChild(novaNotaInput);
+  
+    const div2Element = document.createElement('div');
+
+    const novoPesoId = `peso-${pesoCounter}`;
+    const novoPesoLabel = document.createElement('label');
+    novoPesoLabel.setAttribute('for', novoPesoId);
+    novoPesoLabel.textContent = 'Peso:';
+  
+    const novoPesoInput = document.createElement('input');
+    novoPesoInput.setAttribute('type', 'text');
+    novoPesoInput.setAttribute('id', novoPesoId);
+  
+    div2Element.appendChild(novoPesoLabel);
+    div2Element.appendChild(novoPesoInput);
+  
+    liElement.appendChild(div1Element);
+    liElement.appendChild(div2Element);
+  
+    ulElement.appendChild(liElement);
+  
+  }
+  
 
 // EXERCÍCIO 12.
 /**
@@ -231,7 +404,13 @@ function criarItemNota() {
  * Se não houver mais nenhum <li> a ser removido, nada deve ser feito.
  */
 function removerItemNota() {
-    naoFizIssoAinda();
+    const ulElement = document.querySelector('.ex11a13 ul');
+    const liElements = ulElement.querySelectorAll('li');
+  
+    if (liElements.length > 0) {
+      const lastLiElement = liElements[liElements.length - 1];
+      ulElement.removeChild(lastLiElement);
+    }
 }
 
 // EXERCÍCIO 13.
@@ -261,15 +440,15 @@ function removerItemNota() {
  */
 function verificarAlunoMatriculado() {
     function lerNota(texto) {
-        return lerNumero(texto, {min: 0, max: 10, casas: 2, erro: "Informe a nota corretamente."});
+        return lerNumero(texto, { min: 0, max: 10, casas: 2, erro: "Informe a nota corretamente." });
     }
 
     function lerPeso(texto) {
-        return lerNumero(texto, {min: 0, max: 10, casas: 2, erro: "Informe o peso corretamente."});
+        return lerNumero(texto, { min: 0, max: 10, casas: 2, erro: "Informe o peso corretamente." });
     }
 
     function lerPresenca(texto) {
-        return lerNumero(texto, {min: 0, max: 100, casas: 0, erro: "Informe a presença corretamente."});
+        return lerNumero(texto, { min: 0, max: 100, casas: 0, erro: "Informe a presença corretamente." });
     }
 
     function lerTexto(oQue, texto) {
@@ -281,23 +460,37 @@ function verificarAlunoMatriculado() {
     let texto;
     try {
         const nome = lerTexto("o nome do(a) aluno(a)", document.querySelector("#nome").value);
-        const escolheuEle = naoFizIssoAinda();
-        const escolheuEla = naoFizIssoAinda();
-        if (!escolheuEle && !escolheuEla) throw new Error("Escolha o gênero do(a) aluno(a) corretamente.");
-        const genero = escolheuEle ? "M" : "F";
-        const disciplina = naoFizIssoAinda();
+    
+        const eleChecked = document.querySelector("#ele").checked;
+        const elaChecked = document.querySelector("#ela").checked;
+        if (!eleChecked && !elaChecked) throw new Error("Escolha o gênero do(a) aluno(a) corretamente.");
+        const genero = eleChecked ? "M" : "F";
+    
+        const disciplina = lerTexto("o nome da disciplina", document.querySelector("#disciplina").value);
+    
         const ados = [];
-        for (const item of document.querySelectorAll(naoFizIssoAinda())) {
-            const nota = lerNota(naoFizIssoAinda());
-            const peso = lerPeso(naoFizIssoAinda());
-            ados.push(new Nota(naoFizIssoAinda()));
+        const notaInputs = document.querySelectorAll(".ex11a13 input[id^='nota-']");
+        const pesoInputs = document.querySelectorAll(".ex11a13 input[id^='peso-']");
+        if (notaInputs.length !== pesoInputs.length) throw new Error("Informe a nota e o peso corretamente.");
+    
+        for (let i = 0; i < notaInputs.length; i++) {
+          const nota = lerNota(notaInputs[i].value);
+          const peso = lerPeso(pesoInputs[i].value);
+          ados.push(new Nota(nota, peso));
         }
-        const presenca = lerPresenca(naoFizIssoAinda());
-        texto = new AlunoMatricula(naoFizIssoAinda()).status;
-    } catch (e) {
-        texto = naoFizIssoAinda();
-    }
-    document.querySelector("#situacao").innerHTML = naoFizIssoAinda();
+    
+        const presenca = lerPresenca(document.querySelector("#presenca").value);
+    
+        if (ados.length === 0) {
+            throw new Error("O peso das notas deve somar 10.");
+          }
+
+        const alunoMatricula = new AlunoMatricula(nome, genero, disciplina, ados, presenca);
+        texto = alunoMatricula.status;
+      } catch (e) {
+        texto = e.message;
+      }
+      document.querySelector("#situacao").value = texto;
 }
 
 // EXERCÍCIO 14.
@@ -308,3 +501,30 @@ function verificarAlunoMatriculado() {
 // * area
 // * circunferencia
 // Se o raio recebido no construtor não for um número, lance um TypeError. Se for negativo, lance RangeError.
+
+class Circulo {
+    constructor(raio) {
+      if (typeof raio !== "number" || isNaN(raio) || !isFinite(raio)) {
+        throw new TypeError("O raio deve ser um número.");
+      }
+      if (raio < 0) {
+        throw new RangeError("O raio não pode ser negativo.");
+      }
+      if (raio == NaN){
+              throw new TypeError("Valor inválido ");
+          }
+      this.raio = raio;
+    }
+  
+    get diametro() {
+      return this.raio * 2;
+    }
+  
+    get area() {
+      return Math.PI * Math.pow(this.raio, 2);
+    }
+  
+    get circunferencia() {
+      return 2 * Math.PI * this.raio;
+    }
+}
